@@ -1,5 +1,8 @@
+mod app_data;
+
 use {
-    dialoguer::Select,
+    app_data::AppData,
+    dialoguer::{Input, Select},
     isahc::prelude::*,
     serde_json::Value,
     std::{
@@ -9,14 +12,25 @@ use {
 };
 
 fn main() {
-    let user_name = Some("Milesq");
+    let mut c = AppData::new().unwrap();
+    let user_name = c
+        .get("user_name")
+        .map(|name| String::from(name))
+        .unwrap_or_else(|| {
+            let name: String = Input::new()
+                .with_prompt("Your github nick")
+                .interact()
+                .unwrap();
+
+            c.set("user_name", name.clone().as_str());
+            c.save().unwrap();
+
+            name
+        });
+
     let args: Vec<String> = env::args().collect();
     let mut repo = if args.len() == 1 {
-        if user_name.is_none() {
-            panic!("Passed to few arguments");
-        }
-
-        let options = get_repos(user_name.unwrap());
+        let options = get_repos(&user_name);
         if let Some(options) = options {
             let choosen = Select::new()
                 .with_prompt("Please choose one of yours repo")
@@ -39,7 +53,7 @@ fn main() {
     };
 
     if repo.find('/').is_none() {
-        repo = format!("{}/{}", user_name.unwrap(), repo);
+        repo = format!("{}/{}", user_name, repo);
     }
 
     let result = Command::new("git")
