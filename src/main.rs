@@ -1,4 +1,7 @@
 mod app_data;
+mod messages;
+
+use messages::*;
 
 use {
     app_data::AppData,
@@ -29,6 +32,12 @@ fn main() {
         });
 
     let args: Vec<String> = env::args().collect();
+
+    if args.iter().any(|el| el == "-h" || el == "--help") {
+        println!("{}", HELP_MSG);
+        return;
+    }
+
     let mut repo = if args.len() == 1 {
         let options = get_repos(&user_name);
         if let Some(options) = options {
