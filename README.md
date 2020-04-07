@@ -2,6 +2,6 @@ Clone app previously was small utility app, for cloning my/others repos from git
 I added to this project many functions, and I decided create git for it. I know, to late... :(
 
 Using:
-clone [user name]/[project name]
-clone [your project name]
-clone
+* clone [user name]/[project name]
+* clone [your project name]
+* clone
