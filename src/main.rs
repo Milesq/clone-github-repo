@@ -33,8 +33,17 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
 
-    if args.iter().any(|el| el == "-h" || el == "--help") {
+    let switch_is_set = |switches: &[&str]| {
+        args.iter()
+            .any(|el| switches.iter().any(|switch| switch == el))
+    };
+
+    if switch_is_set(&["-h", "--help"]) {
         println!("{}", HELP_MSG);
+        return;
+    } else if switch_is_set(&["-c", "--clean"]) {
+        std::fs::remove_file(dirs::home_dir().unwrap().join("./clone-cfg.bin")).unwrap();
+        println!("Clean");
         return;
     }
 
