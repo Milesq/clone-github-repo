@@ -3,6 +3,7 @@ Using:
 
 clone [user name]/[project name]
 clone [your project name]
+clone [user name]
 clone
 
 Switches:

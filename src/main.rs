@@ -1,37 +1,34 @@
 mod app_data;
+mod github;
 mod messages;
 
+use github::*;
 use messages::*;
 
 use {
     app_data::AppData,
-    dialoguer::{Input, Select},
-    isahc::prelude::*,
-    serde_json::Value,
+    dialoguer::Input,
     std::{
-        env, io,
+        env,
         process::{Command, Output},
     },
 };
 
 fn main() {
     let mut c = AppData::new().unwrap();
-    let user_name = c
-        .get("user_name")
-        .map(|name| String::from(name))
-        .unwrap_or_else(|| {
-            let name: String = Input::new()
-                .with_prompt("Your github nick")
-                .interact()
-                .unwrap();
+    let user_name = c.get("user_name").map(String::from).unwrap_or_else(|| {
+        let name: String = Input::new()
+            .with_prompt("Your github nick")
+            .interact()
+            .unwrap();
 
-            c.set("user_name", name.clone().as_str());
-            c.save().unwrap();
+        c.set("user_name", name.clone().as_str());
+        c.save().unwrap();
 
-            name
-        });
+        name
+    });
 
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<_> = env::args().collect();
 
     let switch_is_set = |switches: &[&str]| {
         args.iter()
@@ -47,36 +44,29 @@ fn main() {
         return;
     }
 
-    let mut repo = if args.len() == 1 {
-        let options = get_repos(&user_name);
-        if let Some(options) = options {
-            let choosen = Select::new()
-                .with_prompt("Please choose one of yours repo")
-                .items(options.as_slice())
-                .paged(true)
-                .interact_opt()
-                .unwrap()
-                .map(|choosen| options.get(choosen).unwrap());
+    let current_user = GHProfile(user_name.clone());
 
-            if let Some(choosen) = choosen {
-                choosen.clone()
-            } else {
-                input()
-            }
-        } else {
-            input()
-        }
+    let mut repo_name = if args.len() == 1 {
+        current_user.choice_repo()
     } else {
-        args[1].clone()
-    };
+        let repo_or_user_name = args[1].clone();
 
-    if repo.find('/').is_none() {
-        repo = format!("{}/{}", user_name, repo);
+        if current_user.repo_exists(&repo_or_user_name) {
+            Some(repo_or_user_name) // it's repo name
+        } else {
+            GHProfile(repo_or_user_name).choice_repo()
+        }
+    }
+    .unwrap();
+
+    if repo_name.find('/').is_none() {
+        repo_name = format!("{}/{}", user_name, repo_name);
     }
 
+    println!("Cloning from https://github.com/{}.git", repo_name);
     let result = Command::new("git")
         .arg("clone")
-        .arg(format!("https://github.com/{}.git", repo))
+        .arg(format!("https://github.com/{}.git", repo_name))
         .output()
         .expect("Error during download repo");
 
@@ -90,41 +80,4 @@ fn get_message(obj: Output) -> String {
         obj.stderr
     })
     .unwrap()
-}
-
-fn get_repos(user_name: &str) -> Option<Vec<String>> {
-    let url = format!("https://api.github.com/users/{}/repos", user_name);
-
-    let mut resp = to_opt(isahc::get(url.as_str()))?;
-    let repos = to_opt(resp.text())?;
-    let repos = to_opt(serde_json::from_str::<Value>(&repos))?;
-
-    if let Value::Array(repos) = repos {
-        let repos = repos
-            .iter()
-            .filter_map(|repo| {
-                if let Value::String(name) = repo["name"].clone() {
-                    Some(name)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>();
-        Some(repos)
-    } else {
-        None
-    }
-}
-
-fn to_opt<T, E>(result: Result<T, E>) -> Option<T> {
-    match result {
-        Ok(val) => Some(val),
-        Err(_) => None,
-    }
-}
-
-fn input() -> String {
-    let mut buf = String::new();
-    io::stdin().read_line(&mut buf).unwrap();
-    buf
 }

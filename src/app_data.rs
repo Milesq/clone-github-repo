@@ -29,7 +29,7 @@ impl AppData {
                     let deseralized: Result<HashMap<String, String>, _> =
                         bincode::deserialize_from(f);
 
-                    deseralized.map(|data| Some(data)).unwrap_or(None)
+                    deseralized.map(Some).unwrap_or(None)
                 }
                 Err(_) => None,
             }
