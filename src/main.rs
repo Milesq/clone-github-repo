@@ -54,7 +54,11 @@ fn main() {
         if current_user.repo_exists(&repo_or_user_name) {
             Some(repo_or_user_name) // it's repo name
         } else {
-            GHProfile(repo_or_user_name).choice_repo()
+            GHProfile(repo_or_user_name.clone())
+                .choice_repo()
+                .map(|repo_owned_by_another_user| {
+                    format!("{}/{}", repo_or_user_name, repo_owned_by_another_user)
+                })
         }
     }
     .unwrap();
