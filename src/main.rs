@@ -61,38 +61,6 @@ fn main() {
     if preparse_args(args.clone()) {
         return;
     }
-
-    let current_user = GHProfile(user_name.clone());
-
-    let mut repo_name = if args.len() == 1 {
-        current_user.choice_repo()
-    } else {
-        let repo_or_user_name = args[1].clone();
-
-        if current_user.repo_exists(&repo_or_user_name) {
-            Some(repo_or_user_name) // it's repo name
-        } else {
-            GHProfile(repo_or_user_name.clone())
-                .choice_repo()
-                .map(|repo_owned_by_another_user| {
-                    format!("{}/{}", repo_or_user_name, repo_owned_by_another_user)
-                })
-        }
-    }
-    .unwrap();
-
-    if repo_name.find('/').is_none() {
-        repo_name = format!("{}/{}", user_name, repo_name);
-    }
-
-    println!("Cloning from https://github.com/{}.git", repo_name);
-    let result = Command::new("git")
-        .arg("clone")
-        .arg(format!("https://github.com/{}.git", repo_name))
-        .output()
-        .expect("Error during download repo");
-
-    println!("{}", get_message(result));
 }
 
 fn get_message(obj: Output) -> String {
