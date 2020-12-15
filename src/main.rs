@@ -76,7 +76,11 @@ enum RepoAdressType {
 
 fn match_repo_adress(argument: Option<String>) -> Option<RepoAdressType> {
     use RepoAdressType::*;
-    let argument = argument?;
+
+    if argument?.find('/').is_none() {
+        return Some(SpecifiedUserAndRepo);
+    }
+
     Some(SpecifiedUserAndRepo)
 }
 
