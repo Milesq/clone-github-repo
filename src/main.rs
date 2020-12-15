@@ -75,7 +75,9 @@ enum RepoAdressType {
 }
 
 fn match_repo_adress(argument: Option<String>) -> Option<RepoAdressType> {
-    None
+    use RepoAdressType::*;
+    let argument = argument?;
+    Some(SpecifiedUserAndRepo)
 }
 
 fn get_message(obj: Output) -> String {
