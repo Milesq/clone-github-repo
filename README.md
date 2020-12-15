@@ -3,5 +3,6 @@ I added to this project many functions, and I decided create git for it. I know,
 
 Using:
 * clone [user name]/[project name]
+* clone [user name]
 * clone [your project name]
 * clone
