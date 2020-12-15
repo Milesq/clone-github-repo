@@ -61,17 +61,20 @@ fn main() {
     if preparse_args(args.clone()) {
         return;
     }
+
+    println!("{:?}", args);
+    // println!("{:?}", match_repo_adress(Some()));
 }
 
+#[derive(Debug, PartialEq)]
 enum RepoAdressType {
-    OwnedByCurrentUser, // clone
+    OwnedByCurrentUser,        // clone
     SpecifiedCurrentUsersRepo, // clone my-repo
-    OwnedByStrangeUser, // clone github-nickname
-    SpecifiedUserAndRepo, // clone github-nickname/his-repo
+    OwnedByStrangeUser,        // clone github-nickname
+    SpecifiedUserAndRepo,      // clone github-nickname/his-repo
 }
 
 fn match_repo_adress(argument: Option<String>) -> Option<RepoAdressType> {
-    use RepoAdressType::*;
     None
 }
 
@@ -82,4 +85,25 @@ fn get_message(obj: Output) -> String {
         obj.stderr
     })
     .unwrap()
+}
+
+#[cfg(test)]
+mod test_match_repo_adress {
+    use super::{
+        *,
+        RepoAdressType::*
+    };
+
+    #[test]
+    fn returns_none_when_argument_is_none() {
+        assert_eq!(match_repo_adress(None), None);
+    }
+
+    #[test]
+    fn returns_specified_user_and_repo() {
+        assert_eq!(
+            match_repo_adress(Some(String::from("Milesq/awesome-project"))),
+            Some(SpecifiedUserAndRepo)
+        );
+    }
 }
