@@ -63,6 +63,18 @@ fn main() {
     }
 }
 
+enum RepoAdressType {
+    OwnedByCurrentUser, // clone
+    SpecifiedCurrentUsersRepo, // clone my-repo
+    OwnedByStrangeUser, // clone github-nickname
+    SpecifiedUserAndRepo, // clone github-nickname/his-repo
+}
+
+fn match_repo_adress(argument: Option<String>) -> Option<RepoAdressType> {
+    use RepoAdressType::*;
+    None
+}
+
 fn get_message(obj: Output) -> String {
     String::from_utf8(if !obj.stdout.is_empty() {
         obj.stdout
