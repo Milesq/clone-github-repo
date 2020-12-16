@@ -1,46 +1,22 @@
 mod app_data;
 mod github;
 mod messages;
+mod utils;
 
 use github::*;
 use messages::*;
+use utils::*;
 
 use {
     app_data::AppData,
     dialoguer::Input,
-    std::{
-        env,
-        process::{Command, Output},
-    },
+    std::{env, process::Command},
 };
 
-fn execute_switch(args: Vec<String>, actions: Vec<(&[&str], impl Fn())>) -> bool {
-    let is_switch_set = |switches: &[&str]| {
-        args.iter()
-            .any(|el| switches.iter().any(|switch| switch == el))
-    };
-
-    for (args, handler) in actions {
-        if is_switch_set(args) {
-            handler();
-            return true;
-        }
-    }
-
-    false
-}
-
-fn preparse_args(args: Vec<String>) -> bool {
-    let actions: Vec<(&[&str], fn())> = vec![
-        (&["-h", "--help"], || println!("{}", HELP_MSG)),
-        (&["-c", "--clean"], || {
-            std::fs::remove_file(dirs::home_dir().unwrap().join("./clone-cfg.bin")).unwrap();
-            println!("Clean");
-        }),
-    ];
-
-    execute_switch(args, actions)
-}
+// #[link(name = "double_input")]
+// extern {
+//     fn DoubleInput(input: libc::c_int) -> libc::c_int;
+// }
 
 fn main() {
     let mut c = AppData::new().unwrap();
@@ -91,15 +67,6 @@ fn match_repo_adress(current_user: &String, argument: Option<&String>) -> RepoAd
     }
 
     OwnedByStrangeUser
-}
-
-fn get_message(obj: Output) -> String {
-    String::from_utf8(if !obj.stdout.is_empty() {
-        obj.stdout
-    } else {
-        obj.stderr
-    })
-    .unwrap()
 }
 
 #[cfg(test)]
