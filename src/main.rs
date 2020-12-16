@@ -62,7 +62,7 @@ fn main() {
         return;
     }
 
-    println!("{:?}", match_repo_adress(args.get(1)));
+    println!("{:?}", match_repo_adress(&user_name, args.get(1)));
 }
 
 #[derive(Debug, PartialEq)]
@@ -73,7 +73,7 @@ enum RepoAdressType {
     SpecifiedUserAndRepo,      // clone github-nickname/his-repo
 }
 
-fn match_repo_adress(argument: Option<&String>) -> RepoAdressType {
+fn match_repo_adress(current_user: &String, argument: Option<&String>) -> RepoAdressType {
     use RepoAdressType::*;
     let argument = match argument {
         Some(argument) => argument,
@@ -84,10 +84,13 @@ fn match_repo_adress(argument: Option<&String>) -> RepoAdressType {
         return SpecifiedUserAndRepo;
     }
 
-    let x = GHProfile("Milesq".to_string()).repos();
-    println!("Repos: {:?}", x);
+    let current_user = GHProfile("Milesq".to_string());
 
-    SpecifiedUserAndRepo
+    if current_user.repo_exists(argument) {
+        return SpecifiedCurrentUsersRepo;
+    }
+
+    OwnedByStrangeUser
 }
 
 fn get_message(obj: Output) -> String {
