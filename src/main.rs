@@ -62,37 +62,35 @@ fn main() {
         return;
     }
 
-    let current_user = GHProfile(user_name.clone());
+    println!("{:?}", match_repo_adress(&user_name, args.get(1)));
+}
 
-    let mut repo_name = if args.len() == 1 {
-        current_user.choice_repo()
-    } else {
-        let repo_or_user_name = args[1].clone();
+#[derive(Debug, PartialEq)]
+enum RepoAdressType {
+    OwnedByCurrentUser,        // clone
+    SpecifiedCurrentUsersRepo, // clone my-repo
+    OwnedByStrangeUser,        // clone github-nickname
+    SpecifiedUserAndRepo,      // clone github-nickname/his-repo
+}
 
-        if current_user.repo_exists(&repo_or_user_name) {
-            Some(repo_or_user_name) // it's repo name
-        } else {
-            GHProfile(repo_or_user_name.clone())
-                .choice_repo()
-                .map(|repo_owned_by_another_user| {
-                    format!("{}/{}", repo_or_user_name, repo_owned_by_another_user)
-                })
-        }
+fn match_repo_adress(current_user: &String, argument: Option<&String>) -> RepoAdressType {
+    use RepoAdressType::*;
+    let argument = match argument {
+        Some(argument) => argument,
+        None => return OwnedByCurrentUser,
+    };
+
+    if argument.find('/').is_some() {
+        return SpecifiedUserAndRepo;
     }
-    .unwrap();
 
-    if repo_name.find('/').is_none() {
-        repo_name = format!("{}/{}", user_name, repo_name);
+    let current_user = GHProfile("Milesq".to_string());
+
+    if current_user.repo_exists(argument) {
+        return SpecifiedCurrentUsersRepo;
     }
 
-    println!("Cloning from https://github.com/{}.git", repo_name);
-    let result = Command::new("git")
-        .arg("clone")
-        .arg(format!("https://github.com/{}.git", repo_name))
-        .output()
-        .expect("Error during download repo");
-
-    println!("{}", get_message(result));
+    OwnedByStrangeUser
 }
 
 fn get_message(obj: Output) -> String {
@@ -102,4 +100,22 @@ fn get_message(obj: Output) -> String {
         obj.stderr
     })
     .unwrap()
+}
+
+#[cfg(test)]
+mod test_match_repo_adress {
+    use super::{RepoAdressType::*, *};
+
+    #[test]
+    fn returns_none_when_argument_is_none() {
+        assert_eq!(match_repo_adress(None), OwnedByCurrentUser);
+    }
+
+    #[test]
+    fn returns_specified_user_and_repo() {
+        assert_eq!(
+            match_repo_adress(Some(&String::from("Milesq/awesome-project"))),
+            SpecifiedUserAndRepo
+        );
+    }
 }
