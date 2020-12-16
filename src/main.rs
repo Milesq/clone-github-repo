@@ -62,8 +62,7 @@ fn main() {
         return;
     }
 
-    println!("{:?}", args);
-    // println!("{:?}", match_repo_adress(Some()));
+    println!("{:?}", match_repo_adress(args.get(1)));
 }
 
 #[derive(Debug, PartialEq)]
@@ -74,14 +73,21 @@ enum RepoAdressType {
     SpecifiedUserAndRepo,      // clone github-nickname/his-repo
 }
 
-fn match_repo_adress(argument: Option<String>) -> Option<RepoAdressType> {
+fn match_repo_adress(argument: Option<&String>) -> RepoAdressType {
     use RepoAdressType::*;
+    let argument = match argument {
+        Some(argument) => argument,
+        None => return OwnedByCurrentUser,
+    };
 
-    if argument?.find('/').is_none() {
-        return Some(SpecifiedUserAndRepo);
+    if argument.find('/').is_some() {
+        return SpecifiedUserAndRepo;
     }
 
-    Some(SpecifiedUserAndRepo)
+    let x = GHProfile("Milesq".to_string()).repos();
+    println!("Repos: {:?}", x);
+
+    SpecifiedUserAndRepo
 }
 
 fn get_message(obj: Output) -> String {
@@ -95,21 +101,18 @@ fn get_message(obj: Output) -> String {
 
 #[cfg(test)]
 mod test_match_repo_adress {
-    use super::{
-        *,
-        RepoAdressType::*
-    };
+    use super::{RepoAdressType::*, *};
 
     #[test]
     fn returns_none_when_argument_is_none() {
-        assert_eq!(match_repo_adress(None), None);
+        assert_eq!(match_repo_adress(None), OwnedByCurrentUser);
     }
 
     #[test]
     fn returns_specified_user_and_repo() {
         assert_eq!(
-            match_repo_adress(Some(String::from("Milesq/awesome-project"))),
-            Some(SpecifiedUserAndRepo)
+            match_repo_adress(Some(&String::from("Milesq/awesome-project"))),
+            SpecifiedUserAndRepo
         );
     }
 }
