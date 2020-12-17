@@ -16,9 +16,9 @@ impl GHProfile {
             );
             current_page += 1;
 
-            let mut resp = to_opt(isahc::get(url.as_str()))?;
-            let repos = to_opt(resp.text())?;
-            let repos = to_opt(serde_json::from_str::<Value>(&repos))?;
+            let mut resp = isahc::get(url.as_str()).ok()?;
+            let repos = resp.text().ok()?;
+            let repos = serde_json::from_str::<Value>(&repos).ok()?;
 
             if let Value::Array(repos) = repos {
                 if repos.is_empty() {
@@ -61,12 +61,5 @@ impl GHProfile {
             .map(|choosen| repos.get(choosen))
             .flatten()
             .map(|choosen| choosen.as_str().to_string())
-    }
-}
-
-fn to_opt<T, E>(result: Result<T, E>) -> Option<T> {
-    match result {
-        Ok(val) => Some(val),
-        Err(_) => None,
     }
 }
