@@ -1,0 +1,9 @@
+query($login: String!) {
+  user(login: $login) {
+    repositories(first: 50, isFork: false) {
+      nodes {
+        name
+      }
+    }
+  }
+}

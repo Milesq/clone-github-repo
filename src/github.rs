@@ -5,42 +5,9 @@ pub struct GHProfile(pub String);
 
 impl GHProfile {
     pub fn repos(&self) -> Option<Vec<String>> {
-        let mut all_repos = Vec::new();
-        let mut done = false;
-        let mut current_page = 1;
+        println!("repos!");
 
-        while !done {
-            let url = format!(
-                "https://api.github.com/users/{}/repos?page={}",
-                self.0, current_page
-            );
-            current_page += 1;
-
-            let mut resp = isahc::get(url.as_str()).ok()?;
-            let repos = resp.text().ok()?;
-            let repos = serde_json::from_str::<Value>(&repos).ok()?;
-
-            if let Value::Array(repos) = repos {
-                if repos.is_empty() {
-                    done = true;
-                }
-
-                let mut new_repos = repos
-                    .iter()
-                    .filter_map(|repo| {
-                        if let Value::String(name) = repo["name"].clone() {
-                            Some(name)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<_>>();
-
-                all_repos.append(&mut new_repos);
-            }
-        }
-
-        Some(all_repos)
+        Some(vec!["".to_string(), "das".to_string()])
     }
 
     pub fn repo_exists(&self, name: &str) -> bool {
