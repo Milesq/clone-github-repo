@@ -1,4 +1,8 @@
-use {dialoguer::Select, gql::GraphqlClient, serde::Deserialize, serde_json::{Value, json}};
+use {
+    dialoguer::Select,
+    gql::GraphqlClient,
+    serde_json::{json, Value},
+};
 
 #[derive(Debug, Clone)]
 pub struct GHProfile(pub String, pub String);
@@ -15,13 +19,13 @@ impl GHProfile {
             .unwrap();
 
         Some(
-            serde_json::from_value::<ReposResponse>(data)
-                .ok()?
-                .user
-                .repositories
-                .nodes
+            data["user"]["repositories"]["nodes"]
+                .as_array()?
                 .iter()
-                .map(|el| el.name.clone())
+                .map(|el| match &el["name"] {
+                    Value::String(s) => s.clone(),
+                    _ => panic!("value is not a string"),
+                })
                 .collect::<Vec<_>>(),
         )
     }
@@ -56,23 +60,4 @@ impl GHProfile {
             .flatten()
             .map(|choosen| choosen.as_str().to_string())
     }
-}
-
-#[derive(Deserialize, Debug)]
-struct ReposResponse {
-    user: User,
-}
-
-#[derive(Deserialize, Debug)]
-struct User {
-    repositories: Repo,
-}
-#[derive(Deserialize, Debug)]
-struct Repo {
-    nodes: Vec<Node>,
-}
-
-#[derive(Deserialize, Debug)]
-struct Node {
-    name: String,
 }
