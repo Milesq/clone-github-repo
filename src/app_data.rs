@@ -41,7 +41,7 @@ impl AppData {
         self
     }
 
-    pub fn save(self) -> io::Result<()> {
+    pub fn save(&self) -> io::Result<()> {
         let f = open_or_create(self.config_file.as_str())?;
         bincode::serialize_into(f, &self.data).expect("Cannot open file");
 
