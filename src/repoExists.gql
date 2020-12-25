@@ -1,7 +1,5 @@
 query($login: String!, $name: String!) {
   repository(owner: $login, name: $name) {
-    label {
-      name
-    }
+    createdAt
   }
 }

@@ -47,8 +47,17 @@ fn main() {
 
     println!(
         "{:?}",
-        match_repo_adress(&user_name, args.get(1).map(|el| el.as_str()))
+        GHProfile(
+            "Milesq".into(),
+            AppData::new().unwrap().get("token").unwrap().to_string(),
+        )
+        .repo_exists("drive")
     );
+
+    // println!(
+    //     "{:?}",
+    //     match_repo_adress(&user_name, args.get(1).map(|el| el.as_str()))
+    // );
 }
 
 #[derive(Debug, PartialEq)]

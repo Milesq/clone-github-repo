@@ -1,4 +1,4 @@
-use {dialoguer::Select, gql::GraphqlClient, serde::Deserialize, serde_json::json};
+use {dialoguer::Select, gql::GraphqlClient, serde::Deserialize, serde_json::{Value, json}};
 
 #[derive(Debug, Clone)]
 pub struct GHProfile(pub String, pub String);
@@ -28,22 +28,20 @@ impl GHProfile {
 
     pub fn repo_exists(&self, name: &str) -> bool {
         let mut gql = GraphqlClient::new("https://api.github.com/graphql");
-        let get_repos_query = gql.auth(&self.1).query(include_str!("./getRepos.gql"));
+        let get_repos_query = gql.auth(&self.1).query(include_str!("./repoExists.gql"));
 
         let data = get_repos_query
             .send(Some(json!({
                 "login": self.0,
-                "repo": name
+                "name": name
             })))
             .unwrap();
 
-        println!("{:?}", data);
-
-        true
-        // self.repos()
-        //     .unwrap()
-        //     .iter()
-        //     .any(|repo| repo.as_str() == name)
+        if let Value::Null = data["repository"] {
+            false
+        } else {
+            true
+        }
     }
 
     pub fn choice_repo(&self) -> Option<String> {
