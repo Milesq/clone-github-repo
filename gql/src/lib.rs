@@ -68,12 +68,12 @@ impl GraphqlClient {
             serde_json::from_str(&data).expect("data returned by server is not correct JSON");
         let data = unwrap_json_object(data);
 
-        if let Some(errors) = data.get("errors") {
-            return Err(GraphqlError::GraphqlApiError(errors.clone()));
-        }
-
         if let Some(data) = data.get("data") {
             return Ok(data.clone());
+        }
+
+        if let Some(errors) = data.get("errors") {
+            return Err(GraphqlError::GraphqlApiError(errors.clone()));
         }
 
         return Err(GraphqlError::NoData(JSONValue::Object(data)));
