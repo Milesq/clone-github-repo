@@ -27,7 +27,7 @@ fn main() {
         name
     });
 
-    c.get("token").map(String::from).unwrap_or_else(|| {
+    if c.get("token").is_none() {
         let token: String = Input::new()
             .with_prompt("Your github access token")
             .interact()
@@ -35,9 +35,7 @@ fn main() {
 
         c.set("token", &token);
         c.save().unwrap();
-
-        token
-    });
+    }
 
     let args: Vec<_> = env::args().collect();
 
@@ -45,10 +43,10 @@ fn main() {
         return;
     }
 
-    // println!(
-    //     "{:?}",
-    //     match_repo_adress(&user_name, args.get(1).map(|el| el.as_str()))
-    // );
+    println!(
+        "{:?}",
+        match_repo_adress(&user_name, args.get(1).map(|el| el.as_str()))
+    );
 }
 
 #[derive(Debug, PartialEq)]
