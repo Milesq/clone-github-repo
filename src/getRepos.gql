@@ -1,6 +1,6 @@
 query($login: String!) {
   user(login: $login) {
-    repositories(first: 50, isFork: false) {
+    repositories(first: 100, isFork: false) {
       nodes {
         name
       }
