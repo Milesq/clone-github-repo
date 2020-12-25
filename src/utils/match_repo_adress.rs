@@ -1,7 +1,5 @@
-use crate::{
-    GHProfile,
-    AppData
-};
+use crate::GHProfile;
+
 #[derive(Debug, PartialEq)]
 pub enum RepoAdressType {
     OwnedByCurrentUser,        // clone
@@ -10,7 +8,10 @@ pub enum RepoAdressType {
     SpecifiedUserAndRepo,      // clone github-nickname/his-repo
 }
 
-pub fn match_repo_adress(current_user: impl Into<String>, argument: Option<&str>) -> RepoAdressType {
+pub fn match_repo_adress(
+    current_user: impl Into<String>,
+    argument: Option<&str>,
+) -> RepoAdressType {
     let current_user = current_user.into();
 
     use RepoAdressType::*;
@@ -23,10 +24,7 @@ pub fn match_repo_adress(current_user: impl Into<String>, argument: Option<&str>
         return SpecifiedUserAndRepo;
     }
 
-    let current_user = GHProfile(
-        current_user,
-        AppData::new().unwrap().get("token").unwrap().to_string(),
-    );
+    let current_user = GHProfile::new(current_user);
 
     if current_user.repo_exists(&argument) {
         return SpecifiedCurrentUsersRepo;

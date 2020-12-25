@@ -7,11 +7,7 @@ use github::*;
 use messages::*;
 use utils::*;
 
-use {
-    app_data::AppData,
-    dialoguer::Input,
-    std::{convert::Into, env},
-};
+use {app_data::AppData, dialoguer::Input, std::env};
 
 fn main() {
     let mut c = AppData::new().unwrap();
@@ -43,73 +39,27 @@ fn main() {
         return;
     }
 
-    println!(
-        "{:?}",
-        match_repo_adress(&user_name, args.get(1).map(|el| el.as_str()))
-    );
-}
-
-#[derive(Debug, PartialEq)]
-enum RepoAdressType {
-    OwnedByCurrentUser,        // clone
-    SpecifiedCurrentUsersRepo, // clone my-repo
-    OwnedByStrangeUser,        // clone github-nickname
-    SpecifiedUserAndRepo,      // clone github-nickname/his-repo
-}
-
-fn match_repo_adress(current_user: impl Into<String>, argument: Option<&str>) -> RepoAdressType {
-    let current_user = current_user.into();
+    let arg = args.get(1).map(|el| el.as_str());
+    let arg_type = match_repo_adress(&user_name, arg);
+    let arg = arg.unwrap();
 
     use RepoAdressType::*;
-    let argument: String = match argument {
-        Some(argument) => argument.into(),
-        None => return OwnedByCurrentUser,
+    let path = match arg_type {
+        OwnedByCurrentUser => {
+            let choosen = GHProfile::new("Milesq").choice_repo().unwrap();
+            format!("{}/{}", user_name, choosen)
+        }
+        SpecifiedCurrentUsersRepo => {
+            format!("{}/{}", user_name, arg)
+        }
+        OwnedByStrangeUser => {
+            let choosen = GHProfile::new(arg).choice_repo().unwrap();
+            format!("{}/{}", arg, choosen)
+        }
+        SpecifiedUserAndRepo => {
+            arg.into()
+        }
     };
 
-    if argument.find('/').is_some() {
-        return SpecifiedUserAndRepo;
-    }
-
-    let current_user = GHProfile(
-        current_user,
-        AppData::new().unwrap().get("token").unwrap().to_string(),
-    );
-
-    if current_user.repo_exists(&argument) {
-        return SpecifiedCurrentUsersRepo;
-    }
-
-    OwnedByStrangeUser
-}
-
-#[cfg(test)]
-mod test_match_repo_adress {
-    use super::{RepoAdressType::*, *};
-
-    #[test]
-    fn returns_none_when_argument_is_none() {
-        assert_eq!(match_repo_adress("Milesq", None), OwnedByCurrentUser);
-    }
-
-    #[test]
-    fn returns_specified_user_and_repo() {
-        assert_eq!(
-            match_repo_adress("Milesq", Some("Milesq/awesome-project")),
-            SpecifiedUserAndRepo
-        );
-    }
-    #[test]
-    fn returns_specified_current_users_repo() {
-        assert_eq!(
-            match_repo_adress("Milesq", Some("clone-github-repo")),
-            SpecifiedCurrentUsersRepo
-        );
-    }
-    #[test]
-    fn returns_owned_by_strange_user() {
-        assert_eq!(
-            match_repo_adress("Milesq", Some("loremipsumasdasdhabfaksdjhfjahsahsdkasdjh")),
-            OwnedByStrangeUser
-        );
-    }
+    println!("https://www.github.com/{}", path);
 }

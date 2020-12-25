@@ -8,6 +8,17 @@ use {
 pub struct GHProfile(pub String, pub String);
 
 impl GHProfile {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self(
+            name.into(),
+            crate::AppData::new()
+                .unwrap()
+                .get("token")
+                .unwrap()
+                .to_string(),
+        )
+    }
+
     pub fn repos(&self) -> Option<Vec<String>> {
         let mut gql = GraphqlClient::new("https://api.github.com/graphql");
         let get_repos_query = gql.auth(&self.1).query(include_str!("./getRepos.gql"));
