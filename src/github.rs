@@ -1,23 +1,16 @@
-use {
-    dialoguer::Select,
-    gql::{GraphqlClient, GraphqlResult},
-    serde::Deserialize,
-    serde_json::{json, Value},
-};
+use {dialoguer::Select, gql::GraphqlClient, serde::Deserialize, serde_json::json};
 
 #[derive(Debug, Clone)]
-pub struct GHProfile(pub String);
+pub struct GHProfile(pub String, pub String);
 
 impl GHProfile {
     pub fn repos(&self) -> Option<Vec<String>> {
         let mut gql = GraphqlClient::new("https://api.github.com/graphql");
-        let get_repos_query = gql
-            .auth("5a3f51740dca225ae7bf76f2e72956aaa8838136")
-            .query(include_str!("./getRepos.gql"));
+        let get_repos_query = gql.auth(&self.1).query(include_str!("./getRepos.gql"));
 
         let data = get_repos_query
             .send(Some(json!({
-                "login": "Milesq"
+                "login": self.0
             })))
             .unwrap();
 
@@ -34,10 +27,23 @@ impl GHProfile {
     }
 
     pub fn repo_exists(&self, name: &str) -> bool {
-        self.repos()
-            .unwrap()
-            .iter()
-            .any(|repo| repo.as_str() == name)
+        let mut gql = GraphqlClient::new("https://api.github.com/graphql");
+        let get_repos_query = gql.auth(&self.1).query(include_str!("./getRepos.gql"));
+
+        let data = get_repos_query
+            .send(Some(json!({
+                "login": self.0,
+                "repo": name
+            })))
+            .unwrap();
+
+        println!("{:?}", data);
+
+        true
+        // self.repos()
+        //     .unwrap()
+        //     .iter()
+        //     .any(|repo| repo.as_str() == name)
     }
 
     pub fn choice_repo(&self) -> Option<String> {

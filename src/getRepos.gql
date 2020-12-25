@@ -1,9 +1,5 @@
-query($login: String!) {
-  user(login: $login) {
-    repositories(first: 100, isFork: false) {
-      nodes {
-        name
-      }
-    }
+query($login: String!, $repo: String!) {
+  repository(owner: $login, name: $repo) {
+    createdAt
   }
 }
