@@ -71,7 +71,7 @@ fn match_repo_adress(current_user: impl Into<String>, argument: Option<&str>) ->
     }
 
     let current_user = GHProfile(
-        current_user.clone(),
+        current_user,
         AppData::new().unwrap().get("token").unwrap().to_string(),
     );
 

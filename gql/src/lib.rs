@@ -76,6 +76,6 @@ impl GraphqlClient {
             return Err(GraphqlError::GraphqlApiError(errors.clone()));
         }
 
-        return Err(GraphqlError::NoData(JSONValue::Object(data)));
+        Err(GraphqlError::NoData(JSONValue::Object(data)))
     }
 }

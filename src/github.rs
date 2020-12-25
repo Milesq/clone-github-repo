@@ -41,11 +41,7 @@ impl GHProfile {
             })))
             .unwrap();
 
-        if let Value::Null = data["repository"] {
-            false
-        } else {
-            true
-        }
+        matches!(data["repository"], Value::Object(_))
     }
 
     pub fn choice_repo(&self) -> Option<String> {

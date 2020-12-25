@@ -25,8 +25,10 @@ pub fn get_message(obj: Output) -> String {
     .unwrap()
 }
 
+type ArgsHandler<'a, 'b> = (&'a [&'b str], fn());
+
 pub fn preparse_args(args: Vec<String>) -> bool {
-    let actions: Vec<(&[&str], fn())> = vec![
+    let actions: Vec<ArgsHandler> = vec![
         (&["-h", "--help"], || println!("{}", crate::HELP_MSG)),
         (&["-c", "--clean"], || {
             std::fs::remove_file(dirs::home_dir().unwrap().join("./clone-cfg.bin")).unwrap();
