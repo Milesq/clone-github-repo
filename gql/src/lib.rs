@@ -1,18 +1,15 @@
 use {
     isahc::prelude::*,
     serde::Serialize,
-    serde_json::{json, Map as JSONMap, Value as JSONValue},
+    serde_json::{json, Value as JSONValue},
     std::convert::Into,
 };
 
-#[derive(Debug)]
-pub enum GraphqlError {
-    VariablesAreNotAnArray,
-    RequestError(isahc::Error),
-    GraphqlApiError(JSONValue),
-}
+mod utils;
+pub use utils::*;
 
-pub type GraphqlResult<T> = Result<T, GraphqlError>;
+mod result;
+pub use result::*;
 
 #[derive(Debug, Default)]
 pub struct GraphqlClient {
@@ -77,12 +74,4 @@ impl GraphqlClient {
 
         Ok(data["data"].clone())
     }
-}
-
-fn unwrap_json_object(v: JSONValue) -> JSONMap<String, JSONValue> {
-    if let JSONValue::Object(obj) = v {
-        return obj;
-    } else {
-        panic!("json root is not an object")
-    };
 }
