@@ -98,4 +98,18 @@ mod test_match_repo_adress {
             SpecifiedUserAndRepo
         );
     }
+    #[test]
+    fn returns_specified_current_users_repo() {
+        assert_eq!(
+            match_repo_adress("Milesq", Some("clone-github-repo")),
+            SpecifiedCurrentUsersRepo
+        );
+    }
+    #[test]
+    fn returns_owned_by_strange_user() {
+        assert_eq!(
+            match_repo_adress("Milesq", Some("loremipsumasdasdhabfaksdjhfjahsahsdkasdjh")),
+            OwnedByStrangeUser
+        );
+    }
 }
