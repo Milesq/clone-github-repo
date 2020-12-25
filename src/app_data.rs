@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io, path::Path};
+use std::{collections::HashMap, fs, io, path::Path};
 
 #[derive(Default)]
 pub struct AppData {
@@ -24,15 +24,12 @@ impl AppData {
 
     pub fn read(mut self) -> Self {
         self.data = if Path::new(&self.config_file).exists() {
-            match File::open(&self.config_file) {
-                Ok(f) => {
-                    let deseralized: Result<HashMap<String, String>, _> =
-                        bincode::deserialize_from(f);
+            let data = fs::read(&self.config_file).unwrap();
 
-                    deseralized.map(Some).unwrap_or(None)
-                }
-                Err(_) => None,
-            }
+            let deseralized: Result<HashMap<String, String>, _> =
+                bincode::deserialize(data.as_slice());
+
+            deseralized.map(Some).unwrap_or(None)
         } else {
             None
         }
@@ -42,10 +39,8 @@ impl AppData {
     }
 
     pub fn save(&self) -> io::Result<()> {
-        let f = open_or_create(self.config_file.as_str())?;
-        bincode::serialize_into(f, &self.data).expect("Cannot open file");
-
-        Ok(())
+        let data = bincode::serialize(&self.data).expect("Cannot open file");
+        fs::write(self.config_file.as_str(), data)
     }
 
     pub fn set(&mut self, key: &str, val: &str) {
@@ -54,13 +49,5 @@ impl AppData {
 
     pub fn get(&self, key: &str) -> Option<&str> {
         self.data.get(&key.to_string()).map(|val| val.as_str())
-    }
-}
-
-fn open_or_create(path: &str) -> io::Result<File> {
-    if Path::new(path).exists() {
-        File::open(path)
-    } else {
-        File::create(path)
     }
 }
