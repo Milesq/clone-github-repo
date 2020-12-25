@@ -1,8 +1,13 @@
-query($login: String!) {
+query($login: String!, $after: String) {
   user(login: $login) {
-    repositories(first: 100, isFork: false) {
+    repositories(first: 50, after: $after, isFork: false) {
       nodes {
         name
+      }
+
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }

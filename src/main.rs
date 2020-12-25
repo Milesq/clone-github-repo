@@ -7,7 +7,11 @@ use github::*;
 use messages::*;
 use utils::*;
 
-use {app_data::AppData, dialoguer::Input, std::{env, process::Command}};
+use {
+    app_data::AppData,
+    dialoguer::Input,
+    std::{env, process::Command},
+};
 
 fn main() {
     let mut c = AppData::new().unwrap();
@@ -56,9 +60,7 @@ fn main() {
             let choosen = GHProfile::new(arg).choice_repo().unwrap();
             format!("{}/{}", arg, choosen)
         }
-        SpecifiedUserAndRepo => {
-            arg.into()
-        }
+        SpecifiedUserAndRepo => arg.into(),
     };
 
     let path = format!("https://github.com/{}.git/", path);

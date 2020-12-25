@@ -1,6 +1,7 @@
 use {
     dialoguer::Select,
     gql::GraphqlClient,
+    serde::Deserialize,
     serde_json::{json, Value},
 };
 
@@ -19,18 +20,22 @@ impl GHProfile {
         )
     }
 
-    pub fn repos(&self) -> Option<Vec<String>> {
+    fn repos_internal(&self, cursor: Option<String>) -> Option<(Vec<String>, Option<String>)> {
         let mut gql = GraphqlClient::new("https://api.github.com/graphql");
         let get_repos_query = gql.auth(&self.1).query(include_str!("./getRepos.gql"));
 
         let data = get_repos_query
             .send(Some(json!({
-                "login": self.0
+                "login": self.0,
+                "after": cursor,
             })))
             .unwrap();
+        let repos = data["user"]["repositories"].clone();
 
-        Some(
-            data["user"]["repositories"]["nodes"]
+        let page_info: PageInfo = serde_json::from_value(repos["pageInfo"].clone()).ok()?;
+
+        Some((
+            repos["nodes"]
                 .as_array()?
                 .iter()
                 .map(|el| match &el["name"] {
@@ -38,7 +43,24 @@ impl GHProfile {
                     _ => panic!("value is not a string"),
                 })
                 .collect::<Vec<_>>(),
-        )
+            if page_info.hasNextPage {
+                Some(page_info.endCursor)
+            } else {
+                None
+            },
+        ))
+    }
+
+    pub fn repos(&self) -> Option<Vec<String>> {
+        let mut total = self.repos_internal(None)?;
+
+        while let Some(cursor) = &total.1 {
+            let (mut data, next_page_id) = self.repos_internal(Some(cursor.clone()))?;
+            total.0.append(&mut data);
+            total.1 = next_page_id;
+        }
+
+        Some(total.0)
     }
 
     pub fn repo_exists(&self, name: &str) -> bool {
@@ -67,4 +89,11 @@ impl GHProfile {
             .flatten()
             .map(|choosen| choosen.as_str().to_string())
     }
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(non_snake_case)]
+struct PageInfo {
+    hasNextPage: bool,
+    endCursor: String,
 }
