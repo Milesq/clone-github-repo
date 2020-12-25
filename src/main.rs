@@ -7,7 +7,7 @@ use github::*;
 use messages::*;
 use utils::*;
 
-use {app_data::AppData, dialoguer::Input, std::env};
+use {app_data::AppData, dialoguer::Input, std::{env, process::Command}};
 
 fn main() {
     let mut c = AppData::new().unwrap();
@@ -41,7 +41,7 @@ fn main() {
 
     let arg = args.get(1).map(|el| el.as_str());
     let arg_type = match_repo_adress(&user_name, arg);
-    let arg = arg.unwrap();
+    let arg = arg.or(Some("")).unwrap();
 
     use RepoAdressType::*;
     let path = match arg_type {
@@ -61,5 +61,15 @@ fn main() {
         }
     };
 
-    println!("https://www.github.com/{}", path);
+    let path = format!("https://github.com/{}.git/", path);
+
+    println!("{}", path);
+
+    let result = Command::new("git")
+        .arg("clone")
+        .arg(path)
+        .output()
+        .expect("Error during download repo");
+
+    println!("{}", get_message(result));
 }
