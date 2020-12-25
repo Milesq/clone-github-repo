@@ -1,4 +1,6 @@
 use std::process::Output;
+mod match_repo_adress;
+pub use match_repo_adress::*;
 
 fn execute_switch(args: Vec<String>, actions: Vec<(&[&str], impl Fn())>) -> bool {
     let is_switch_set = |switches: &[&str]| {
