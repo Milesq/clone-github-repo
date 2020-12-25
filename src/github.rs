@@ -1,11 +1,20 @@
-use {dialoguer::Select, isahc::prelude::*, serde_json::Value};
+use {dialoguer::Select, serde_json::{Value, json}, gql::GraphqlClient};
 
 #[derive(Debug, Clone)]
 pub struct GHProfile(pub String);
 
 impl GHProfile {
     pub fn repos(&self) -> Option<Vec<String>> {
-        println!("repos!");
+        let mut gql = gql::GraphqlClient::new("https://api.github.com/graphql");
+        let get_repos_query = gql
+            .auth("80da5a3b6eeb85f66fc6111529fd01d73d012b27")
+            .query(include_str!("./getRepos.gql"));
+
+        let data = get_repos_query.send(Some(json!({
+            "login": "Milesq"
+        })));
+
+        println!("{:#?}", data);
 
         Some(vec!["".to_string(), "das".to_string()])
     }
