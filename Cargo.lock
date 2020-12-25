@@ -83,6 +83,7 @@ dependencies = [
  "dialoguer",
  "dirs",
  "gql",
+ "serde",
  "serde_json",
 ]
 

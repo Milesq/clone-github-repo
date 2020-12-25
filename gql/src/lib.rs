@@ -72,6 +72,10 @@ impl GraphqlClient {
             return Err(GraphqlError::GraphqlApiError(errors.clone()));
         }
 
-        Ok(data["data"].clone())
+        if let Some(data) = data.get("data") {
+            return Ok(data.clone());
+        }
+
+        return Err(GraphqlError::NoData(JSONValue::Object(data)));
     }
 }
