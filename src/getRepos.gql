@@ -1,6 +1,11 @@
-query($login: String!, $after: String) {
+query ($login: String!, $after: String) {
   user(login: $login) {
-    repositories(first: 50, after: $after, isFork: false) {
+    repositories(
+      first: 50
+      after: $after
+      isFork: false
+      orderBy: { field: NAME, direction: ASC }
+    ) {
       nodes {
         name
       }
