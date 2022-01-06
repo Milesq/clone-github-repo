@@ -17,6 +17,7 @@ pub struct GraphqlClient {
     token: String,
     body: GraphqlRequestBody,
 }
+
 #[derive(Serialize, Debug, Default)]
 pub struct GraphqlRequestBody {
     query: Option<String>,
