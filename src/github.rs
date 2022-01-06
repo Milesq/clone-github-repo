@@ -82,7 +82,6 @@ impl GHProfile {
         Select::new()
             .with_prompt("Please choose repo to download")
             .items(repos.as_slice())
-            .paged(true)
             .interact_opt()
             .unwrap()
             .map(|choosen| repos.get(choosen))
