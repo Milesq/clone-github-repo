@@ -1,5 +1,5 @@
 use {
-    dialoguer::Select,
+    dialoguer::FuzzySelect,
     gql::GraphqlClient,
     serde::Deserialize,
     serde_json::{json, Value},
@@ -79,7 +79,7 @@ impl GHProfile {
 
     pub fn choice_repo(&self) -> Option<String> {
         let repos = self.repos()?;
-        Select::new()
+        FuzzySelect::new()
             .with_prompt("Please choose repo to download")
             .items(repos.as_slice())
             .interact_opt()
