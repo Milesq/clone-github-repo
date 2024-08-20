@@ -4,7 +4,7 @@ query ($login: String!, $after: String) {
       first: 50
       after: $after
       isFork: false
-      orderBy: { field: NAME, direction: ASC }
+      orderBy: { field: UPDATED_AT, direction: DESC }
     ) {
       nodes {
         name
