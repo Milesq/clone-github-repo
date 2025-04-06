@@ -1,3 +1,8 @@
+mod keyring;
+use aes_gcm::{
+    aead::{Aead, AeadCore, KeyInit, OsRng},
+    Aes256Gcm, Key, Nonce,
+};
 use std::{collections::HashMap, fs, io, path::Path};
 
 #[derive(Default)]
@@ -40,7 +45,13 @@ impl AppData {
 
     pub fn save(&self) -> io::Result<()> {
         let data = bincode::serialize(&self.data).expect("Cannot open file");
-        fs::write(self.config_file.as_str(), data)
+
+        let cred = keyring::generate_app_secret_key().unwrap();
+        let cipher = Aes256Gcm::new(&cred.key);
+
+        let ciphertext = cipher.encrypt(&cred.nonce, data.as_slice()).expect("encryption error");
+
+        fs::write(self.config_file.as_str(), ciphertext)
     }
 
     pub fn set(&mut self, key: &str, val: &str) {
