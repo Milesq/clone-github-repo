@@ -29,10 +29,15 @@ impl AppData {
 
     pub fn read(mut self) -> Self {
         self.data = if Path::new(&self.config_file).exists() {
-            let data = fs::read(&self.config_file).unwrap();
+            let encrypted = fs::read(&self.config_file).unwrap();
 
-            let deseralized: Result<HashMap<String, String>, _> =
-                bincode::deserialize(data.as_slice());
+            let cred = keyring::get_app_secret_key().unwrap();
+            let cipher = Aes256Gcm::new(&cred.key);
+            let plain_data = cipher
+                .decrypt(&cred.nonce, encrypted.as_slice())
+                .expect("decryption error");
+
+            let deseralized: Result<HashMap<String, String>, _> = bincode::deserialize(&plain_data);
 
             deseralized.map(Some).unwrap_or(None)
         } else {
