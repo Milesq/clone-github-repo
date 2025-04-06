@@ -48,9 +48,9 @@ fn main() {
     let arg = arg.or(Some("")).unwrap();
 
     use RepoAdressType::*;
-    let path = match arg_type {
+    let path: String = match arg_type {
         OwnedByCurrentUser => {
-            let choosen = GHProfile::new("Milesq").choice_repo().unwrap();
+            let choosen = GHProfile::new(user_name).choice_repo().unwrap();
             format!("{}/{}", user_name, choosen)
         }
         SpecifiedCurrentUsersRepo => {
