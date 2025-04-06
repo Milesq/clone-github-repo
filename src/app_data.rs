@@ -8,7 +8,7 @@ pub struct AppData {
 
 impl AppData {
     pub fn new() -> Option<Self> {
-        let default_path = dirs::config_dir()?.join("clone-cfg.bin");
+        let default_path = dirs::config_dir()?.join("clone.bin");
         Some(Self::with_path(default_path.to_str()?.to_string()))
     }
 
