@@ -47,6 +47,6 @@ pub fn generate_app_secret_key() -> Result<AesCredentials, String> {
 
     Ok(AesCredentials {
         key,
-        nonce: nonce.into(),
+        nonce,
     })
 }

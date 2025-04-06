@@ -45,7 +45,7 @@ fn main() {
 
     let arg = args.get(1).map(|el| el.as_str());
     let arg_type = match_repo_adress(&user_name, arg);
-    let arg = arg.or(Some("")).unwrap();
+    let arg = arg.unwrap_or_default();
 
     use RepoAdressType::*;
     let path: String = match arg_type {
