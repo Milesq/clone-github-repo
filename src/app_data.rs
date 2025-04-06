@@ -1,7 +1,7 @@
 mod keyring;
 use aes_gcm::{
-    aead::{Aead, AeadCore, KeyInit, OsRng},
-    Aes256Gcm, Key, Nonce,
+    aead::{Aead, KeyInit},
+    Aes256Gcm,
 };
 use std::{collections::HashMap, fs, io, path::Path};
 
@@ -54,7 +54,9 @@ impl AppData {
         let cred = keyring::generate_app_secret_key().unwrap();
         let cipher = Aes256Gcm::new(&cred.key);
 
-        let ciphertext = cipher.encrypt(&cred.nonce, data.as_slice()).expect("encryption error");
+        let ciphertext = cipher
+            .encrypt(&cred.nonce, data.as_slice())
+            .expect("encryption error");
 
         fs::write(self.config_file.as_str(), ciphertext)
     }

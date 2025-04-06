@@ -50,7 +50,7 @@ fn main() {
     use RepoAdressType::*;
     let path: String = match arg_type {
         OwnedByCurrentUser => {
-            let choosen = GHProfile::new(user_name).choice_repo().unwrap();
+            let choosen = GHProfile::new(&user_name).choice_repo().unwrap();
             format!("{}/{}", user_name, choosen)
         }
         SpecifiedCurrentUsersRepo => {

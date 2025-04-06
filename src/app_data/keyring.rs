@@ -18,7 +18,10 @@ pub fn get_app_secret_key() -> Result<AesCredentials, String> {
     if !key.success {
         return generate_app_secret_key();
     }
-    let (key, nonce) = key.password.split_once(":").expect("Wrong key format, data seems to be corrupted. Check your keyring");
+    let (key, nonce) = key
+        .password
+        .split_once(":")
+        .expect("Wrong key format, data seems to be corrupted. Check your keyring");
 
     let key = STANDARD.decode(key).expect("Failed to decode key");
     let nonce = STANDARD.decode(nonce).expect("Failed to decode nonce");
@@ -38,7 +41,7 @@ pub fn generate_app_secret_key() -> Result<AesCredentials, String> {
 
     let secret = format!("{}:{}", b64_key, b64_nonce);
 
-    if let Err(err) = keytar::set_password("dev.milesq.clone", "default", secret.as_ref()){
+    if let Err(err) = keytar::set_password("dev.milesq.clone", "default", secret.as_ref()) {
         return Err(format!("Failed to set password in keyring: {:?}", err));
     }
 
